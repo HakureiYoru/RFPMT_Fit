@@ -7,13 +7,13 @@ def xy_fft(gen_x, gen_y):
     ft_gen_x = np.fft.rfft(gen_x)
     abs_ft_gen_x = np.abs(ft_gen_x) / (len(gen_x) / 2)
     angle_ft_gen_x = np.angle(ft_gen_x)
-    freq_gen_x = np.fft.rfftfreq(len(gen_x))
+    freq_gen_x = np.fft.rfftfreq(len(gen_x), d=1/20)
 
     # Fourier transform of gen_y
     ft_gen_y = np.fft.rfft(gen_y)
     abs_ft_gen_y = np.abs(ft_gen_y) / (len(gen_y) / 2)
     angle_ft_gen_y = np.angle(ft_gen_y)
-    freq_gen_y = np.fft.rfftfreq(len(gen_y))
+    freq_gen_y = np.fft.rfftfreq(len(gen_y), d=1/20)
 
     results = {
         "gen_x_amplitudes": [],
@@ -47,16 +47,6 @@ def xy_fft(gen_x, gen_y):
     return results
 
 
-def process_data(gen_x, gen_y, f1, f2):
-    # Adjusting the frequency according to the number of points in a cycle
-    base_points = 500
-    adjustment_factor = base_points / len(gen_x)
-
-    # Adjust the frequency because we only use one period of data
-    f1 = f1 / adjustment_factor
-    f2 = f2 / adjustment_factor
-
-    return {"f1": f1, "f2": f2}
 
 
 def keep_one_period(gen_x, gen_y):
