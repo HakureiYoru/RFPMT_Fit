@@ -1,6 +1,8 @@
-# curvefit
+# Curvefit
 
-# Project Title
+This is the released version, the developing/debugging/preview version in: https://github.com/HakureiYoru/curvefit/tree/differential_evolution
+
+# Simulation of electron motion in a fast changing field for new detector development
 
 ## Overview
 
