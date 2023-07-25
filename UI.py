@@ -230,6 +230,50 @@ def create_app():
                 else:
                     gen_time, gen_weight = [], []
 
+                # Find the maximum time
+                max_time = max(t for times in gen_time for t in times)
+
+                # Initialize a big histogram with bins from 0 to max_time + 1000
+                BigHist = np.zeros(int(max_time) + 1)
+
+                # Go over all data points
+                for times, weights in zip(gen_time, gen_weight):
+                    for t, w in zip(times, weights):
+                        # Check if time or weight is NaN
+                        if np.isnan(t) or np.isnan(w):
+                            # Handle NaN here
+                            if np.isnan(w):
+                                # If weight is NaN, replace it with 0
+                                w = 0
+                            else:
+                                # If time is NaN, decide what to do
+                                # Here we just skip this data point
+                                continue
+
+                        # Use t as index and w as weight to fill BigHist
+                        BigHist[int(t)] += w
+
+                # Create the new window
+                his_window = tk.Toplevel()
+                his_window.title("Histogram")
+                his_window.geometry("600x400")  # Set the initial size of the window
+
+                # Create a figure
+                fig_his = Figure(figsize=(5, 4), dpi=100)
+                # Add a subplot to the figure
+                ax_his = fig_his.add_subplot(111)
+
+                # Draw BigHist on the subplot
+                ax_his.bar(range(len(BigHist)), BigHist)
+
+                # Create a FigureCanvasTkAgg object
+                canvas_his = FigureCanvasTkAgg(fig_his, master=his_window)
+
+                # Display the canvas
+                canvas_his.draw()
+                canvas_his.get_tk_widget().pack(side="top", fill="both", expand=1)
+
+
                 # Convert the times and weights to strings and limit to 3 decimal places
                 gen_time_str = [str([f"{t:.0f}" for t in times]) for times in gen_time]
                 # Convert the weights to strings and limit to 3 decimal places
