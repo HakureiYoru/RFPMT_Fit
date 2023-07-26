@@ -15,7 +15,7 @@ from sklearn.mixture import GaussianMixture
 from scipy.spatial.distance import cdist
 import ast
 from matplotlib.colors import PowerNorm
-
+import itertools
 
 def create_app():
     def create_detector_time_map_ui(fit_x, fit_y, pixel_size, sigma, delta_time, progress_callback=None):
@@ -743,8 +743,12 @@ def create_app():
             df = pd.read_csv(file_path, header=None, sep=" ")
             parameters_data, data = df.iloc[0], df.iloc[1:]
 
-            f2_real, f1_real, _, _, _, _, _, _ = [float(val[1:]) if isinstance(val, str) and val.startswith('#') else val for val
-                                        in parameters_data.values]  # to remove "#" before f1
+            f2_real, f1_real, _ , _, _, _, _, _ = [
+                float(val[1:]) if isinstance(val, str) and val.startswith('#') else val for val
+                in parameters_data.values]  # to remove "#" before f1
+
+            # f2_real, _, f1_real, _, _, _, _, _ = [float(val[1:]) if isinstance(val, str) and val.startswith('#') else val for val
+            #                             in parameters_data.values]  # to remove "#" before f1
             gen_x, gen_y = data[0].values, data[1].values
 
             if previous_window is not None:
@@ -766,6 +770,10 @@ def create_app():
             p_y = analysis_results["gen_y_phases"]
 
             f = analysis_results["gen_x_frequencies"]
+            f_a=  analysis_results["gen_y_frequencies"]
+
+            print(f)
+            print(f_a)
 
             if len(f) == 1:
                 f1 = f[0]
@@ -850,23 +858,56 @@ def create_app():
             axs[1].set_ylabel('Value')
             axs[1].legend()
 
+
+
+            # Define a list of marker styles
+            marker_styles = ['o', 's', '^', 'v', 'd', 'P', '*']
+
+            # Plot the frequency components of y
+            if len(f) == 1:
+                f_x = np.full_like(A_x, f[0])
+            else:
+                f_x = f
+
+            marker = itertools.cycle(
+                marker_styles)  # Create an iterator that returns elements from marker_styles in a loop
+
             # Plot the frequency components of x
-            axs[2].stem(f, np.abs(A_x), markerfmt=' ', linefmt='C0-', basefmt=" ",
-                        label='gen_x FFT')  # Use stem plot for frequency components
+            markerline_x, stemlines_x, baseline_x = axs[2].stem(f_x, np.abs(A_x), linefmt='C0-', basefmt=" ",
+                                                                label='gen_x FFT')  # Use stem plot for frequency components
             axs[2].set_title('gen_x Frequency Components')
             axs[2].set_xlabel('Frequency')
             axs[2].set_ylabel('Magnitude')
             axs[2].legend()
-            axs[2].set_xlim(0, 1.2 * max(f))  # Set the maximum value to 120% of the maximum frequency in the data
+            axs[2].set_xlim(0, 1.2 * max(f_x))  # Set the maximum value to 120% of the maximum frequency in the data
+
+            # Change the marker style for each stem line
+            for m in marker:
+                markerline_x.set_marker(m)
+                break
 
             # Plot the frequency components of y
-            axs[3].stem(f, np.abs(B_y), markerfmt=' ', linefmt='C1-', basefmt=" ",
-                        label='gen_y FFT')  # Use stem plot for frequency components
+            if len(f) == 1:
+                f_y = np.full_like(B_y, f[0])
+            else:
+                f_y = f
+
+            marker = itertools.cycle(
+                marker_styles)  # Create an iterator that returns elements from marker_styles in a loop
+
+            # Plot the frequency components of y
+            markerline_y, stemlines_y, baseline_y = axs[3].stem(f_y, np.abs(B_y), linefmt='C1-', basefmt=" ",
+                                                                label='gen_y FFT')  # Use stem plot for frequency components
             axs[3].set_title('gen_y Frequency Components')
             axs[3].set_xlabel('Frequency')
             axs[3].set_ylabel('Magnitude')
             axs[3].legend()
-            axs[3].set_xlim(0, 1.2 * max(f))  # Set the maximum value to 120% of the maximum frequency in the data
+            axs[3].set_xlim(0, 1.2 * max(f_y))  # Set the maximum value to 120% of the maximum frequency in the data
+
+            # Change the marker style for each stem line
+            for m in marker:
+                markerline_y.set_marker(m)
+                break
 
             plt.tight_layout()
 

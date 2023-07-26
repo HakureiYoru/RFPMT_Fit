@@ -26,7 +26,7 @@ def xy_fft(gen_x, gen_y):
 
     # Find the dominant frequency of gen_x
     for i in range(len(freq_gen_x)):
-        if abs_ft_gen_x[i] > 0.2:  # set the boundary of important frequency components
+        if abs_ft_gen_x[i] > 0.05:  # set the boundary of important frequency components
             amplitude = abs_ft_gen_x[i]
             phase = angle_ft_gen_x[i]
             frequency = freq_gen_x[i]
@@ -36,7 +36,7 @@ def xy_fft(gen_x, gen_y):
 
     # Find the dominant frequency of gen_y
     for i in range(len(freq_gen_y)):
-        if abs_ft_gen_y[i] > 0.2:  # set the boundary of important frequency components
+        if abs_ft_gen_y[i] > 0.05:  # set the boundary of important frequency components
             amplitude = abs_ft_gen_y[i]
             phase = angle_ft_gen_y[i]
             frequency = freq_gen_y[i]
@@ -50,16 +50,28 @@ def xy_fft(gen_x, gen_y):
 
 
 def keep_one_period(gen_x, gen_y):
-    # Calculate the Fourier Transform
-    fourier_transform = np.fft.rfft(gen_y)
-    abs_fourier_transform = np.abs(fourier_transform)
-    power_spectrum = np.square(abs_fourier_transform)
-    frequency = np.fft.rfftfreq(gen_y.size)
-    dominant_frequency = frequency[np.argmax(power_spectrum)]
-    period = int(np.round(1 / dominant_frequency))
+    # Calculate the Fourier Transform for gen_x
+    fourier_transform_x = np.fft.rfft(gen_x)
+    abs_fourier_transform_x = np.abs(fourier_transform_x)
+    power_spectrum_x = np.square(abs_fourier_transform_x)
+    frequency_x = np.fft.rfftfreq(gen_x.size)
+    dominant_frequency_x = frequency_x[np.argmax(power_spectrum_x)]
+    period_x = int(np.round(1 / dominant_frequency_x))
+
+    # Calculate the Fourier Transform for gen_y
+    fourier_transform_y = np.fft.rfft(gen_y)
+    abs_fourier_transform_y = np.abs(fourier_transform_y)
+    power_spectrum_y = np.square(abs_fourier_transform_y)
+    frequency_y = np.fft.rfftfreq(gen_y.size)
+    dominant_frequency_y = frequency_y[np.argmax(power_spectrum_y)]
+    period_y = int(np.round(1 / dominant_frequency_y))
+
+    # Find the least common multiple of period_x and period_y
+    from math import gcd
+    lcm_period = period_x * period_y // gcd(period_x, period_y)
 
     # Only keep one period of data
-    return gen_x[:period], gen_y[:period]
+    return gen_x[:lcm_period], gen_y[:lcm_period]
 
 
 def calculate_map(fit_x, fit_y, pixel_size, sigma, delta_time, progress_callback):
