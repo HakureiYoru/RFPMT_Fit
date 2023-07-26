@@ -357,17 +357,17 @@ def create_app():
                     ax_map.arrow(centroid[0], centroid[1], direction[0], direction[1],
                                  head_width=5, head_length=5, fc='red', ec='red')
 
-                    # Get the times of the points in the current cluster
-                    times = time_map[gen_y_pixel[labels == cluster_id], gen_x_pixel[labels == cluster_id]]
-
-                    # Compute the projection of the points on the direction vector
-                    projections = np.dot(points - centroid, direction)
-
-                    # Sort the times based on the projections
-                    sorted_times = times[np.argsort(projections)]
-
-                    # Update the times of the points in the current cluster
-                    time_map[gen_y_pixel[labels == cluster_id], gen_x_pixel[labels == cluster_id]] = sorted_times
+                    # # Get the times of the points in the current cluster
+                    # times = time_map[gen_y_pixel[labels == cluster_id], gen_x_pixel[labels == cluster_id]]
+                    #
+                    # # Compute the projection of the points on the direction vector
+                    # projections = np.dot(points - centroid, direction)
+                    #
+                    # # Sort the times based on the projections
+                    # sorted_times = times[np.argsort(projections)]
+                    #
+                    # # Update the times of the points in the current cluster
+                    # time_map[gen_y_pixel[labels == cluster_id], gen_x_pixel[labels == cluster_id]] = sorted_times
 
                 # Remove the old images
                 if ax_map.images:
@@ -398,12 +398,15 @@ def create_app():
 
                         # check if all weights are less than 0.001
                         if all(w < 0.001 for w in weights):
-                            # if so, skip this point
-                            continue
+                            # if so, add a special marker to the weights
+                            weight_display = 'LOW'
+                        else:
+                            # Remove brackets and quotes from the string representation of the list for display
+                            weight_display = weight[1:-1].replace("'", "")
 
                         # Remove brackets and quotes from the string representation of the lists for display
                         times_display = times[1:-1].replace("'", "")
-                        weight_display = weight[1:-1].replace("'", "")
+                        # weight_display = weight[1:-1].replace("'", "")
 
                         treeview.insert('', 'end',
                                         values=(
