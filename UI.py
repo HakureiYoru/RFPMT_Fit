@@ -835,7 +835,8 @@ def create_app():
             plot_frame = tk.Frame(xy_window)
             plot_frame.pack(side="right", padx=10, pady=10, expand=True, fill=tk.BOTH)
 
-            fig_load, axs = plt.subplots(2, 1, figsize=(6, 6))
+            # Instantiate a new figure for the plot
+            fig_load, axs = plt.subplots(4, 1, figsize=(6, 10))  # Create four subplots
 
             axs[0].plot(gen_x, label='gen_x')
             axs[0].set_title('gen_x')
@@ -848,6 +849,24 @@ def create_app():
             axs[1].set_xlabel('Index')
             axs[1].set_ylabel('Value')
             axs[1].legend()
+
+            # Plot the frequency components of x
+            axs[2].stem(f, np.abs(A_x), markerfmt=' ', linefmt='C0-', basefmt=" ",
+                        label='gen_x FFT')  # Use stem plot for frequency components
+            axs[2].set_title('gen_x Frequency Components')
+            axs[2].set_xlabel('Frequency')
+            axs[2].set_ylabel('Magnitude')
+            axs[2].legend()
+            axs[2].set_xlim(0, 1.2 * max(f))  # Set the maximum value to 120% of the maximum frequency in the data
+
+            # Plot the frequency components of y
+            axs[3].stem(f, np.abs(B_y), markerfmt=' ', linefmt='C1-', basefmt=" ",
+                        label='gen_y FFT')  # Use stem plot for frequency components
+            axs[3].set_title('gen_y Frequency Components')
+            axs[3].set_xlabel('Frequency')
+            axs[3].set_ylabel('Magnitude')
+            axs[3].legend()
+            axs[3].set_xlim(0, 1.2 * max(f))  # Set the maximum value to 120% of the maximum frequency in the data
 
             plt.tight_layout()
 
