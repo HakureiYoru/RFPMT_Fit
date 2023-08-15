@@ -131,16 +131,61 @@ def calculate_map(fit_x, fit_y, pixel_size, sigma, delta_time, progress_callback
         if progress_callback is not None:
             progress_callback(increment=progress_increment)
 
-    # After all other calculations
+    CROSSING_THRESHOLD = 150 # 该阈值可以根据需要进行调整
+    # 这些是我们选择的两个像素的坐标
+    CROSSING_POINT = (314, 328)  # 从你之前的输出中选择的交叉点
+    NON_CROSSING_POINT = (320, 318)  # 随便选择的一个非交叉点，你可以选择其他的
+
     for y_pixel in range(detector_height):
         for x_pixel in range(detector_width):
-            # Check if there are any non-nan values
             if not np.isnan(time_map[y_pixel, x_pixel]).all():
-                # Calculate the real time of the particle in this pixel
-                real_time = np.nanmean(time_map[y_pixel, x_pixel])
+                # 检测是否为交叉点
+                std_dev = np.nanstd(time_map[y_pixel, x_pixel])
+                if std_dev > CROSSING_THRESHOLD:
+                    print(f"Detected a crossing at pixel ({x_pixel}, {y_pixel}) with std_dev = {std_dev}")
 
-                # Calculate the weights for each timestamp
-                time_diff = time_map[y_pixel, x_pixel] - real_time
-                weight_time_map[y_pixel, x_pixel] = np.exp(-time_diff ** 2 / (2 * sigma ** 2))
+                    # 去除 nan 值后将时间进行排序
+                    non_nan_times = time_map[y_pixel, x_pixel][~np.isnan(time_map[y_pixel, x_pixel])]
+                    sorted_times = np.sort(non_nan_times)
+                    print(f"Sorted times: {sorted_times}")
+
+                    time_diff = np.diff(sorted_times)
+                    max_diff_idx = np.argmax(time_diff)
+                    print(f"Max time difference index: {max_diff_idx}")
+
+                    # 分割时间集合
+                    cluster_1 = sorted_times[:max_diff_idx + 1]
+                    cluster_2 = sorted_times[max_diff_idx + 1:]
+                    print(f"Cluster 1 times: {cluster_1}")
+                    print(f"Cluster 2 times: {cluster_2}")
+
+                    # 计算每个子集的平均时间
+                    avg_time_1 = np.nanmean(cluster_1)
+                    avg_time_2 = np.nanmean(cluster_2)
+                    print(f"Average time for Cluster 1: {avg_time_1}")
+                    print(f"Average time for Cluster 2: {avg_time_2}")
+
+                    # 为子集中的时间分配权重
+                    weight_time_map[y_pixel, x_pixel, :len(cluster_1)] = np.exp(
+                        -(cluster_1 - avg_time_1) ** 2 / (2 * sigma ** 2))
+                    weight_time_map[y_pixel, x_pixel, len(cluster_1):len(cluster_1) + len(cluster_2)] = np.exp(
+                        -(cluster_2 - avg_time_2) ** 2 / (2 * sigma ** 2))
+
+                else:
+                    # 如果不是交叉点，则按照原来的方法计算权重
+                    real_time = np.nanmean(time_map[y_pixel, x_pixel])
+                    time_diff = time_map[y_pixel, x_pixel] - real_time
+                    weight_time_map[y_pixel, x_pixel] = np.exp(-time_diff ** 2 / (2 * sigma ** 2))
+
+
+
+
+
+
+            else:
+                    # 如果不是交叉点，则按照原来的方法计算权重
+                    real_time = np.nanmean(time_map[y_pixel, x_pixel])
+                    time_diff = time_map[y_pixel, x_pixel] - real_time
+                    weight_time_map[y_pixel, x_pixel] = np.exp(-time_diff ** 2 / (2 * sigma ** 2))
 
     return counts, time_map, weight_map, weight_time_map, detector_width, detector_height, time_counter, x_min, y_min

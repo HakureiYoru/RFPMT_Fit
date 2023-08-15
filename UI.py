@@ -357,17 +357,6 @@ def create_app():
                     ax_map.arrow(centroid[0], centroid[1], direction[0], direction[1],
                                  head_width=5, head_length=5, fc='red', ec='red')
 
-                    # # Get the times of the points in the current cluster
-                    # times = time_map[gen_y_pixel[labels == cluster_id], gen_x_pixel[labels == cluster_id]]
-                    #
-                    # # Compute the projection of the points on the direction vector
-                    # projections = np.dot(points - centroid, direction)
-                    #
-                    # # Sort the times based on the projections
-                    # sorted_times = times[np.argsort(projections)]
-                    #
-                    # # Update the times of the points in the current cluster
-                    # time_map[gen_y_pixel[labels == cluster_id], gen_x_pixel[labels == cluster_id]] = sorted_times
 
                 # Remove the old images
                 if ax_map.images:
