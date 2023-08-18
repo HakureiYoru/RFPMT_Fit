@@ -132,9 +132,6 @@ def calculate_map(fit_x, fit_y, pixel_size, sigma, delta_time, progress_callback
             progress_callback(increment=progress_increment)
 
     CROSSING_THRESHOLD = 150 # 该阈值可以根据需要进行调整
-    # 这些是我们选择的两个像素的坐标
-    CROSSING_POINT = (314, 328)  # 从你之前的输出中选择的交叉点
-    NON_CROSSING_POINT = (320, 318)  # 随便选择的一个非交叉点，你可以选择其他的
 
     for y_pixel in range(detector_height):
         for x_pixel in range(detector_width):
@@ -181,11 +178,5 @@ def calculate_map(fit_x, fit_y, pixel_size, sigma, delta_time, progress_callback
 
 
 
-
-            else:
-                    # 如果不是交叉点，则按照原来的方法计算权重
-                    real_time = np.nanmean(time_map[y_pixel, x_pixel])
-                    time_diff = time_map[y_pixel, x_pixel] - real_time
-                    weight_time_map[y_pixel, x_pixel] = np.exp(-time_diff ** 2 / (2 * sigma ** 2))
 
     return counts, time_map, weight_map, weight_time_map, detector_width, detector_height, time_counter, x_min, y_min

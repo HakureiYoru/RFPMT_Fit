@@ -308,54 +308,59 @@ def create_app():
 
                 # Clear the treeview widget
                 treeview.delete(*treeview.get_children())
+                with open('cluster_result.dat', 'w') as f:
+                    # Iterate over the clusters
+                    for cluster_id in range(n_clusters):
+                        # Get the points in the current cluster
+                        points = np.vstack([gen_x_pixel[labels == cluster_id], gen_y_pixel[labels == cluster_id]]).T
 
-                # Iterate over the clusters
-                for cluster_id in range(n_clusters):
-                    # Get the points in the current cluster
-                    points = np.vstack([gen_x_pixel[labels == cluster_id], gen_y_pixel[labels == cluster_id]]).T
+                        # Compute the centroid of the cluster
+                        centroid = np.mean(points, axis=0)
 
-                    # Compute the centroid of the cluster
-                    centroid = np.mean(points, axis=0)
+                        # Compute the furthest point in the cluster from its centroid
+                        furthest_point = points[cdist([centroid], points).argmax()]
 
-                    # Compute the furthest point in the cluster from its centroid
-                    furthest_point = points[cdist([centroid], points).argmax()]
+                        # Compute the direction vectors from the centroid to its furthest point
+                        direction = furthest_point - centroid
 
-                    # Compute the direction vectors from the centroid to its furthest point
-                    direction = furthest_point - centroid
+                        print('Main direction of cluster %d: %s' % (cluster_id, direction))
 
-                    print('Main direction of cluster %d: %s' % (cluster_id, direction))
+                        # Compute the time and weight at the centroid
+                        centroid_times = time_map[int(round(centroid[1])), int(round(centroid[0]))]
+                        centroid_weights = weight_time_map[int(round(centroid[1])), int(round(centroid[0]))]
 
-                    # Compute the time and weight at the centroid
-                    centroid_times = time_map[int(round(centroid[1])), int(round(centroid[0]))]
-                    centroid_weights = weight_time_map[int(round(centroid[1])), int(round(centroid[0]))]
+                        # Sort the times and weights by weight
+                        centroid_times_and_weights = sorted(zip(centroid_times, centroid_weights), key=lambda tw: tw[1],
+                                                            reverse=True)
+                        if choice == "show top 3 weight":
+                            centroid_times_and_weights = centroid_times_and_weights[:3]
 
-                    # Sort the times and weights by weight
-                    centroid_times_and_weights = sorted(zip(centroid_times, centroid_weights), key=lambda tw: tw[1],
-                                                        reverse=True)
-                    if choice == "show top 3 weight":
-                        centroid_times_and_weights = centroid_times_and_weights[:3]
+                        # Separate the times and weights again
+                        centroid_times, centroid_weights = zip(*centroid_times_and_weights)
 
-                    # Separate the times and weights again
-                    centroid_times, centroid_weights = zip(*centroid_times_and_weights)
+                        centroid_time_str = str([f"{t:.0f}" for t in centroid_times])
+                        centroid_weight_str = str([f"{w:.3f}" for w in centroid_weights])
+                        centroid_position_weight_str = f"{weight_map[int(round(centroid[1])), int(round(centroid[0]))]:.3f}"
 
-                    centroid_time_str = str([f"{t:.0f}" for t in centroid_times])
-                    centroid_weight_str = str([f"{w:.3f}" for w in centroid_weights])
-                    centroid_position_weight_str = f"{weight_map[int(round(centroid[1])), int(round(centroid[0]))]:.3f}"
+                        # Remove brackets and quotes from the string representation of the lists for display
+                        centroid_times_display = centroid_time_str[1:-1].replace("'", "")
+                        centroid_weight_display = centroid_weight_str[1:-1].replace("'", "")
 
-                    # Remove brackets and quotes from the string representation of the lists for display
-                    centroid_times_display = centroid_time_str[1:-1].replace("'", "")
-                    centroid_weight_display = centroid_weight_str[1:-1].replace("'", "")
+                        # Add the cluster centroid, time, and weights to the cluster Treeview widget
+                        cluster_treeview.insert('', 'end',
+                                                values=(
+                                                    centroid[0], centroid[1], centroid_times_display,
+                                                    centroid_weight_display,
+                                                    centroid_position_weight_str))  # Add each item to the end of the Treeview
 
-                    # Add the cluster centroid, time, and weights to the cluster Treeview widget
-                    cluster_treeview.insert('', 'end',
-                                            values=(
-                                                centroid[0], centroid[1], centroid_times_display,
-                                                centroid_weight_display,
-                                                centroid_position_weight_str))  # Add each item to the end of the Treeview
+                        # Write the result to the file
+                        f.write(
+                            f"{centroid[0]}, {centroid[1]}, {centroid_times_display}, {centroid_weight_display}, {centroid_position_weight_str}\n")
 
-                    # Plot the direction vector on ax_map
-                    ax_map.arrow(centroid[0], centroid[1], direction[0], direction[1],
-                                 head_width=5, head_length=5, fc='red', ec='red')
+                        # Plot the direction vector on ax_map
+                        ax_map.arrow(centroid[0], centroid[1], direction[0], direction[1],
+                                     head_width=5, head_length=5, fc='red', ec='red')
+
 
 
                 # Remove the old images
