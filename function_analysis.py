@@ -147,7 +147,7 @@ def calculate_map(fit_x, fit_y, pixel_size, sigma, delta_time, progress_callback
                     print(f"Sorted times: {sorted_times}")
 
                     time_diff = np.diff(sorted_times)
-                    max_diff_idx = np.argmax(time_diff)
+                    max_diff_idx = np.argmax(time_diff) 
                     print(f"Max time difference index: {max_diff_idx}")
 
 

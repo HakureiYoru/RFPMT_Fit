@@ -965,7 +965,7 @@ def create_app():
                 draw_plot(ax, canvas, gen_x, gen_y, 'Original and Fitted Data', 'Original data', clear=False,
                           scatter=True)
                 draw_plot(ax, canvas, fit_x2, fit_y2, 'New Data', 'Filtered data', clear=False, scatter=False)
-                # 标记每过50个点的节点
+                # Mark the nodes every 50 points
                 for i in range(0, len(fit_x2), 50):
                     label = f'({fit_x2[i]:.2f}, {fit_y2[i]:.2f}, {i})'
                     ax.annotate(label, (fit_x2[i], fit_y2[i]), xytext=(5, -10),
@@ -1075,10 +1075,8 @@ def create_app():
     image_window = None
     zoom_window = None
     plot_window = None
+    ax_time_map = None
 
-    ax_time_map = None  # Initialize ax_time_map
-    # Initial value 0.05
-    # 定义空词典
     bounds_factor_dict = dict()
 
     app = tk.Tk()
